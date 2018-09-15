@@ -3,8 +3,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
-const dns = require('dns');
-
+const urlExists = require('url-exists');
 
 const Schema = mongoose.Schema;
 
@@ -39,7 +38,6 @@ app.get('/', (req, res) =>
 app.post('/url-shortener', async function (req, res) {{
 
   const { url_name } = req.body;
-  const teste = url_name;
 
   var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
   '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|'+ // domain name
@@ -50,23 +48,25 @@ app.post('/url-shortener', async function (req, res) {{
 
   //usar o regexp para validar a url, depois usar o dns para verificar se o site existe
   //caso as duas condições sejam satisfeitas retorne o json com o a Original e a Short
-  result = teste.replace(/^(?:https?:\/\/)?(\.)?/i, "").split('/')[0];
 
-
-
-  if(pattern.test( url_name ) === true){
+  if(pattern.test( url_name ) === true){ //caso não passe no regex ele retorna um json com o erro
+    //Invalid Url regex Error
+    urlExists(url_name , async function(err, exists) {
+      if(exists === true){
+        console.log("Eh uma URL verdadeira");
+        const all = await Url.find();
+        const createdUrl = await Url.create({ originalUrl: url_name, shortenedUrl: (all.length + 1) });
+        const {originalUrl, shortenedUrl} = createdUrl
+        res.json({originalUrl, shortenedUrl});
+      } else {
+        console.log("Eh uma URL falsa");
+        res.json({ error : "Invalid Url, URL does not exist"});
+      }
+    });
 
   } else {
-
     res.json({ error : "Invalid Url regex Error"});
-
   }
-    
-    const all = await Url.find();
-    const createdUrl = await Url.create({ originalUrl: url_name, shortenedUrl: (all.length + 1) });
-    const {originalUrl, shortenedUrl} = createdUrl
-    res.json({originalUrl, shortenedUrl});
-
   }
 });
 
