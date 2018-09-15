@@ -2,15 +2,11 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 const path = require('path');
 const dns = require('dns');
-var http = require('http');
 
-const options = {
-  family: 6,
-  hints: dns.ADDRCONFIG | dns.V4MAPPED,
-};
+
+const Schema = mongoose.Schema;
 
 app.use(bodyParser());
 app.use(express.static(__dirname + '/public'));
@@ -58,35 +54,13 @@ app.post('/url-shortener', async function (req, res) {{
 
 
 
-  if(pattern.test(url_name) === true){
-    dns.lookup( result, function (err, addresses) {
-      if(err) {
-        res.json({ error : "invalid Url dns Error" });
-      } else {
-        console.log(addresses);
-        
-      }
-    });
+  if(pattern.test( url_name ) === true){
+
   } else {
-    res.json({ error : "invalid Url regex Error" });
+
+    res.json({ error : "Invalid Url regex Error"});
+
   }
-    //uses the core modules to run an IPv4 resolver that returns 'err' on error
-  // calls the function of a given url        
-
-
-/*
-  if(pattern.test(url_name) === true){
-    dns.lookup( result, function (err, addresses) {
-      if(err) {
-        res.json({ error : "invalid Url dns Error" });
-      } else {
-        console.log(addresses);
-        
-      }
-    });
-  }else{
-    res.json({ error : "invalid Url regex Error" });
-  }*/
     
     const all = await Url.find();
     const createdUrl = await Url.create({ originalUrl: url_name, shortenedUrl: (all.length + 1) });
