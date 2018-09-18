@@ -10,7 +10,9 @@ const Schema = mongoose.Schema;
 app.use(bodyParser());
 app.use(express.static(__dirname + '/public'));
 
-mongoose.connect('mongodb://localhost/test');
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost/test'
+
+mongoose.connect(MONGO_URI);
 
 const db = mongoose.connection;
 
@@ -51,22 +53,20 @@ app.post('/url-shortener', async function (req, res) {{
 
   if(pattern.test( url_name ) === true){ //caso não passe no regex ele retorna um json com o erro
     //Invalid Url regex Error
-    urlExists(url_name , async function(err, exists) {
+    urlExists(url_name , async function(err, exists) { //Aqui verifica se a Url existe, caso não
+      //exista retorna um json com o erro URL does not exist
       if(exists === true){
-        console.log("Eh uma URL verdadeira");
         const all = await Url.find();
         const createdUrl = await Url.create({ originalUrl: url_name, shortenedUrl: (all.length + 1) });
         const {originalUrl, shortenedUrl} = createdUrl
         res.json({originalUrl, shortenedUrl});
       } else {
-        console.log("Eh uma URL falsa");
         res.json({ error : "Invalid Url, URL does not exist"});
       }
     });
-
   } else {
-    res.json({ error : "Invalid Url regex Error"});
-  }
+      res.json({ error : "Invalid Url regex Error"});
+    }
   }
 });
 
