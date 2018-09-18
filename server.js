@@ -12,7 +12,7 @@ app.use(express.static(__dirname + '/public'));
 
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost/test'
 
-mongoose.connect(MONGO_URI);
+mongoose.connect(MONGO_URI, {uri_decode_auth: true});
 
 const db = mongoose.connection;
 
